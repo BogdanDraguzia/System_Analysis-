@@ -17,7 +17,7 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         const int N = 3;
-        const double e = 0.0001;
+        const double e = 0.00001;
         bool Approximate = false;
         Stream XStream;
         Stream OStream;
@@ -413,15 +413,13 @@ namespace WindowsFormsApp1
             {
                 try
                 {
-                    if ((XStream = openFileDialog1.OpenFile()) !=
-                        null)
+                    if ((XStream = openFileDialog1.OpenFile()) !=null)
                     {
                         Xinput.Text = openFileDialog1.SafeFileName;
                         l = 0.78;
                     }
                 }
-                catch (Exception
-                    ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(@"Error: Could not read file from disk. Original error: " + ex.Message);
                 }
@@ -910,20 +908,11 @@ namespace WindowsFormsApp1
             for (int j = 0; j < d[i]; j++)
                 MinX[i][j] = MaxX[i][j] = X[i][0, j];
 
-            for (int i = 0;
-                i <
-                N;
-                i++)
+            for (int i = 0;i < N; i++)
             {
-                for (int j = 0;
-                    j
-                    < d[i];
-                    j++)
+                for (int j = 0; j< d[i]; j++)
                 {
-                    for (int q0 =
-                            0;
-                        q0 < n;
-                        q0++)
+                    for (int q0 =0; q0 < n; q0++)
                     {
                         if
                             (MinX[i][j] > X[i][q0, j])
@@ -1465,7 +1454,7 @@ namespace WindowsFormsApp1
             }
 
             Approximate = true;
-            Draw1(Convert.ToInt32(numericUpDown1.Value - 1));
+            Draw1(Convert.ToInt32(Rankx1.Value - 1));
             XStream.Close();
             XStream =openFileDialog1.OpenFile();
             foreach (Stream s in YStream) s.Close();
@@ -1584,6 +1573,7 @@ namespace WindowsFormsApp1
         {
         }
 
+        
         private void zedGraphControl1_Load(object sender, EventArgs e)
         {
         }
@@ -1637,13 +1627,13 @@ namespace WindowsFormsApp1
 
         private void dimy_ValueChanged(object sender, EventArgs e)
         {
-            numericUpDown1.Maximum = dimy.Value;
+            Rankx1.Maximum = dimy.Value;
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
             if (Approximate)
-                Draw1(Convert.ToInt32(numericUpDown1.Value - 1));
+                Draw1(Convert.ToInt32(Rankx1.Value - 1));
         }
 
         private void button1_Click(object sender, EventArgs e)
