@@ -409,7 +409,8 @@ namespace WindowsFormsApp1
 
         private void xload_Click(object sender, EventArgs e)
         {
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            var dr = openFileDialog1.ShowDialog();
+            if ( dr == DialogResult.OK)
             {
                 try
                 {
@@ -769,7 +770,9 @@ namespace WindowsFormsApp1
 
         private void addbutton_Click(object sender, EventArgs e)
         {
-            if (openFileDialog2.ShowDialog() == DialogResult.OK)
+            var dr = openFileDialog2.ShowDialog();
+
+            if (dr == DialogResult.OK)
             {
                 try
                 {  
@@ -815,15 +818,15 @@ namespace WindowsFormsApp1
             OStream = saveFileDialog1.OpenFile();
 
             // Initializing
-            int n = Convert.ToInt32(Range.Value);
-            int[] d = new int[N];
-            d[0] = Convert.ToInt32(dim1.Value);
-            X[0] = new double[n, d[0]];
-            d[1] = Convert.ToInt32(dim2.Value);
-            X[1] = new double[n, d[1]];
-            d[2] = Convert.ToInt32(dim3.Value);
-            X[2] = new double[n, d[2]];
-            dG = d;
+            int n = Convert.ToInt32(Range.Value); //n - РАЗМЕР ВЫБОРКИ 
+            int[] dimensions_X = new int[N];
+            dimensions_X[0] = Convert.ToInt32(dim1.Value);
+            X[0] = new double[n, dimensions_X[0]];
+            dimensions_X[1] = Convert.ToInt32(dim2.Value);
+            X[1] = new double[n, dimensions_X[1]];
+            dimensions_X[2] = Convert.ToInt32(dim3.Value);
+            X[2] = new double[n, dimensions_X[2]];
+            dG = dimensions_X;
             int dy = Convert.ToInt32(dimy.Value);
             Y = new double[dy][];
             for (int i = 0; i < dy; i++) Y[i] = new double[n];
@@ -852,14 +855,17 @@ namespace WindowsFormsApp1
                 return;
             }
 
-            for (int i = 0, k = 0; i < n; i++)
+
+            //Сначала заполняется столбец X11, затем столбец Х12 и т.д.
+            for (int i = 0, k = 0; i < n; i++)//для каждого x от 1 до размера выборки
             {
-                k++;
-                for (int l = 0; l < N; l++)
-                for (int j = 0; j < d[l]; j++, k++)
-                    X[l][i, j] = arr[k];
+                
+                for (int l = 0; l < N; l++) //каждому иксу от 1 до 3 
+                    for (int j = 0; j < dimensions_X[l]; j++, k++) // каждому (иксу)x_l от 1 до размерности вектора x_l
+                        X[l][i, j] = arr[k];
             }
 
+            //Сначала заполняется первый столбец игреков, потом второй, и т.д. - Каждый У в отдельном файле
             for (int i = 0; i < dy; i++)
             {
                 try
@@ -892,11 +898,11 @@ namespace WindowsFormsApp1
             StreamWriter Out = new StreamWriter(OStream);
             double[][] MinX = new double[N][];
             for (int i = 0; i < N; i++)
-                MinX[i] = new double[d[i]];
+                MinX[i] = new double[dimensions_X[i]];
 
             double[][] MaxX = new double[N][];
             for (int i = 0; i < N; i++)
-                MaxX[i] = new double[d[i]];
+                MaxX[i] = new double[dimensions_X[i]];
             double[] MinY = new double[dy];
             double[] MaxY = new double[dy];
             MaxYG = MaxY;
@@ -905,12 +911,12 @@ namespace WindowsFormsApp1
             MinXG = MinX;
 
             for (int i = 0; i < N; i++)
-            for (int j = 0; j < d[i]; j++)
+            for (int j = 0; j < dimensions_X[i]; j++)
                 MinX[i][j] = MaxX[i][j] = X[i][0, j];
 
             for (int i = 0;i < N; i++)
             {
-                for (int j = 0; j< d[i]; j++)
+                for (int j = 0; j< dimensions_X[i]; j++)
                 {
                     for (int q0 =0; q0 < n; q0++)
                     {
@@ -950,9 +956,9 @@ namespace WindowsFormsApp1
             YG = new double[dy][];
             for (int i = 0; i < N; i++)
             {
-                Z[i] = new double[n, d[i]];
+                Z[i] = new double[n, dimensions_X[i]];
                 for (int k = 0; k < n; k++)
-                for (int w = 0; w < d[i]; w++)
+                for (int w = 0; w < dimensions_X[i]; w++)
                     Z[i][k, w] = (X[i][k, w] - MinX[i][w]) / (MaxX[i][w] - MinX[i][w]);
             }
 
@@ -1002,7 +1008,7 @@ namespace WindowsFormsApp1
 
             double[][,] lamb = new double[N][,];
             for (int i = 0; i < N; i++)
-                lamb[i] = new double[d[i], P[i] + 1];
+                lamb[i] = new double[dimensions_X[i], P[i] + 1];
             Func<int, double, double> f = SChebishev;
             if
                 (PolinoType.SelectedIndex == 1)
@@ -1016,44 +1022,44 @@ namespace WindowsFormsApp1
 
             if (!checkBox1.Checked)
             {
-                double[] megalamb = new double[(P[0] + 1) * d[0] + (P[1] + 1) * d[1] + (P[2] + 1) * d[2]];
-                double[] T = new double[((P[0] + 1) * d[0] + (P[1] + 1) * d[1] + (P[2] + 1) * d[2]) * n];
+                double[] megalamb = new double[(P[0] + 1) * dimensions_X[0] + (P[1] + 1) * dimensions_X[1] + (P[2] + 1) * dimensions_X[2]];
+                double[] T = new double[((P[0] + 1) * dimensions_X[0] + (P[1] + 1) * dimensions_X[1] + (P[2] + 1) * dimensions_X[2]) * n];
                 int k = 0;
                 for (int q0 = 0; q0 < n; q0++)
                 for (int i = 0; i < N; i++)
-                for (int j = 0; j < d[i]; j++)
+                for (int j = 0; j < dimensions_X[i]; j++)
                 for (int p = 0; p <= P[i]; p++)
                 {
                     T[k] = f(p, Z[i][q0, j]);
                     k++;
                 }
 
-                LinearEnvelope L = new LinearEnvelope(T, B, (P[0] + 1) * d[0] + (P[1] + 1) * d[1] + (P[2] + 1) * d[2]);
+                LinearEnvelope L = new LinearEnvelope(T, B, (P[0] + 1) * dimensions_X[0] + (P[1] + 1) * dimensions_X[1] + (P[2] + 1) * dimensions_X[2]);
                 megalamb = GM(megalamb, L.Method, L);
                 k = 0;
                 for (int i = 0; i < N; i++)
-                for (int j = 0; j < d[i]; j++)
+                for (int j = 0; j < dimensions_X[i]; j++)
                 for (int p = 0; p <= P[i]; p++, k++)
                     lamb[i][j, p] = megalamb[k];
             }
             else
                 for (int i = 0; i < N; i++)
                 {
-                    double[] megalamb = new double[(P[i] + 1) * d[i]];
-                    double[] T = new double[(P[i] + 1) * d[i] * n];
+                    double[] megalamb = new double[(P[i] + 1) * dimensions_X[i]];
+                    double[] T = new double[(P[i] + 1) * dimensions_X[i] * n];
                     int k = 0;
                     for (int q0 = 0; q0 < n; q0++)
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                     for (int p = 0; p <= P[i]; p++)
                     {
                         T[k] = f(p, Z[i][q0, j]);
                         k++;
                     }
 
-                    LinearEnvelope L = new LinearEnvelope(T, B, (P[i] + 1) * d[i]);
+                    LinearEnvelope L = new LinearEnvelope(T, B, (P[i] + 1) * dimensions_X[i]);
                     megalamb = GM(megalamb, L.Method, L);
                     k = 0;
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                     for (int p = 0; p <= P[i]; p++, k++)
                         lamb[i][j, p] = megalamb[k];
                 }
@@ -1062,7 +1068,7 @@ namespace WindowsFormsApp1
             for (int i = 0; i < N; i++)
             {
                 Result.Text += "\tLambda" + (i + 1) + ":\r\n";
-                for (int j = 0; j < d[i]; j++)
+                for (int j = 0; j < dimensions_X[i]; j++)
                 {
                     for (int p = 0; p <= P[i]; p++)
                         Result.Text += "\t" + lamb[i][j, p].ToString("F4");
@@ -1076,7 +1082,7 @@ namespace WindowsFormsApp1
             {
                 dispt = 0;
                 for (int i = 0; i < N; i++)
-                for (int j = 0; j < d[i]; j++)
+                for (int j = 0; j < dimensions_X[i]; j++)
                 for (int p = 0; p <= P[i]; p++)
                     dispt += lamb[i][j, p] * f(p, Z[i][q0, j]);
                 if (Math.Abs(dispt - B[q0]) > disp)
@@ -1093,7 +1099,7 @@ namespace WindowsFormsApp1
             Result.Text += "in T form(where T is Your Approximation Polynom) \r\n";
             for (int i = 0; i < N; i++)
             {
-                for (int j = 0; j < d[i]; j++)
+                for (int j = 0; j < dimensions_X[i]; j++)
                 {
                     Result.Text += "Psi" + (i + 1) + "," + (j + 1) + " = ";
                     for (int p = 0; p <= P[i]; p++)
@@ -1115,10 +1121,10 @@ namespace WindowsFormsApp1
                 Pf = PHermith;
             double[][][] coef = new double[N][][];
             for (int i = 0; i < N; i++)
-                coef[i] = new double[d[i]][];
+                coef[i] = new double[dimensions_X[i]][];
             for (int i = 0; i < N; i++)
             {
-                for (int j = 0; j < d[i]; j++)
+                for (int j = 0; j < dimensions_X[i]; j++)
                 {
                     coef[i][j] = new double[Math.Max(Math.Max(P[0], P[1]), P[2]) + 1];
                     double[] tmp = new double[Math.Max(Math.Max(P[0], P[1]), P[2]) + 1];
@@ -1146,25 +1152,25 @@ namespace WindowsFormsApp1
             for (int i = 0; i < dy; i++) a[i] = new double[N][];
             for (int i = 0; i < dy; i++)
             for (int j = 0; j < N; j++)
-                a[i][j] = new double[d[j]];
+                a[i][j] = new double[dimensions_X[j]];
 
             for (int m = 0; m < dy; m++)
             {
                 for (int i = 0; i < N; i++)
                 {
-                    double[] megalamb = new double[d[i]];
-                    double[] T = new double[d[i] * n];
+                    double[] megalamb = new double[dimensions_X[i]];
+                    double[] T = new double[dimensions_X[i] * n];
                     int k = 0;
                     for (int q0 = 0; q0 < n; q0++)
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                     {
                         T[k] = new Polynom(coef[i][j]).Method(Z[i][q0, j]);
                         k++;
                     }
 
-                    LinearEnvelope L = new LinearEnvelope(T, ZY[m], d[i]);
+                    LinearEnvelope L = new LinearEnvelope(T, ZY[m], dimensions_X[i]);
                     megalamb = GM(megalamb, L.Method, L);
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                         a[m][i][j] = megalamb[j];
                 }
             }
@@ -1175,7 +1181,7 @@ namespace WindowsFormsApp1
                 Result.Text += "Matrix ||a" + (m + 1) + "||:\r\n";
                 for (int i = 0; i < N; i++)
                 {
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                     {
                         Result.Text += "\t" + a[m][i][j].ToString("F4");
                     }
@@ -1193,7 +1199,7 @@ namespace WindowsFormsApp1
                 for (int q0 = 0; q0 < n; q0++)
                 {
                     dispt = 0;
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                         dispt += a[m][i][j] * (new Polynom(coef[i][j]).Method(Z[i][q0, j]));
                     if (Math.Abs(dispt - ZY[m][q0]) > disp)
                         disp = Math.Abs(dispt - ZY[m][q0]);
@@ -1214,7 +1220,7 @@ namespace WindowsFormsApp1
                 for (int i = 0; i < N; i++)
                 {
                     Result.Text += "F" + (m + 1) + "," + (i + 1) + " = ";
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                     {
                         Result.Text += " + " + a[m][i][j].ToString("F4") + " *Psi" + (i + 1) + "," + (j + 1) +
                                        "(X" + (i + 1) + "," + (j + 1) + "[q0])\t";
@@ -1230,7 +1236,7 @@ namespace WindowsFormsApp1
                 for (int i = 0; i < N; i++)
                 {
                     Result.Text += "\r\nF" + (m + 1) + "," + (i + 1) + " = ";
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                     {
                         for (int k = coef[i][j].Length - 1; k >= 2; k--)
                             Result.Text += " + " + (coef[i][j][k] * a[m][i][j]).ToString("F4") + " *x"
@@ -1261,7 +1267,7 @@ namespace WindowsFormsApp1
                     for (int i = 0; i < N; i++)
                     {
                         double tmp = 0;
-                        for (int j = 0; j < d[i]; j++)
+                        for (int j = 0; j < dimensions_X[i]; j++)
                             tmp += (new Polynom(coef[i][j]).Method(Z[i][q0, j])) * a[m][i][j];
                         T[k] = tmp;
                         k++;
@@ -1289,7 +1295,7 @@ namespace WindowsFormsApp1
                 dispt = 0;
                 for (int i = 0; i < N; i++)
                 {
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                         dispt += a[m][i][j] * (new Polynom(coef[i][j]).Method(Z[i][q0, j]));
                     dispt *= c[m][i];
                 }
@@ -1322,8 +1328,8 @@ namespace WindowsFormsApp1
                 Result.Text += "Ф" + (m + 1) + " = \t";
                 for (int i = 0; i < N; i++)
                 {
-                    PolyCoef[m][i] = new double[d[i]][];
-                    for (int j = 0; j < d[i]; j++)
+                    PolyCoef[m][i] = new double[dimensions_X[i]][];
+                    for (int j = 0; j < dimensions_X[i]; j++)
                     {
                         PolyCoef[m][i][j] = new double[Math.Max(Math.Max(P[0], P[1]), P[2]) + 1];
                         for (int k = coef[i][j].Length - 1; k >= 0; k--)
@@ -1352,7 +1358,7 @@ namespace WindowsFormsApp1
                 Result.Text += "\r\nФ" + (m + 1) + " = \t";
                 for (int i = 0; i < N; i++)
                 {
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                     {
                         for (int p = 0; p <= P[i]; p++)
                         {
@@ -1386,7 +1392,7 @@ namespace WindowsFormsApp1
                 Result.Text += "\r\n Ф" + (m + 1) + " = \r\n";
                 for (int i = 0; i < N; i++)
                 {
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                     {
                         for (int k = coef[i][j].Length - 1; k >= 2; k--)
                             Result.Text += " + "
@@ -1411,7 +1417,7 @@ namespace WindowsFormsApp1
                 Result.Text += "\r\nФ = \t";
                 for (int i = 0; i < N; i++)
                 {
-                    for (int j = 0; j < d[i]; j++)
+                    for (int j = 0; j < dimensions_X[i]; j++)
                     {
                         for (int p = 0; p <= P[i]; p++)
                         {
@@ -1438,7 +1444,7 @@ namespace WindowsFormsApp1
                 {
                     tmp = 0;
                     for (int i = 0; i < N; i++)
-                        for (int j = 0; j < d[i]; j++)
+                        for (int j = 0; j < dimensions_X[i]; j++)
                             tmp += (zt * a[m][i][j] * c[m][i]) * (new Polynom(coef[i][j]).Method(Z[i][q0, j]));
                     if (Math.Abs(tmp - ZY[m][q0]) > diff[m])
                         diff[m] = Math.Abs(tmp - ZY[m][q0]);
@@ -1561,19 +1567,9 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void groupBoxInput_Enter(object sender, EventArgs e)
-        {
-        }
+      
+       
 
-        private void groupBox1_Enter(object sender, EventArgs e)
-        {
-        }
-
-        private void dim2_ValueChanged(object sender, EventArgs e)
-        {
-        }
-
-        
         private void zedGraphControl1_Load(object sender, EventArgs e)
         {
         }
@@ -1645,8 +1641,8 @@ namespace WindowsFormsApp1
             MessageBox.Show(helpText, "Help Box!");
         }
 
-        
 
+       
     }
 }
 
