@@ -132,7 +132,7 @@
             this.addbutton.Name = "addbutton";
             this.addbutton.Size = new System.Drawing.Size(104, 23);
             this.addbutton.TabIndex = 6;
-            this.addbutton.Text = "Завантажити X_ij";
+            this.addbutton.Text = "Завантажити Y_i";
             this.addbutton.UseVisualStyleBackColor = true;
             this.addbutton.Click += new System.EventHandler(this.addbutton_Click);
             // 
@@ -480,6 +480,7 @@
             0,
             0,
             0});
+            this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
             // 
             // checkBox1
             // 

@@ -1460,7 +1460,7 @@ namespace WindowsFormsApp1
             }
 
             Approximate = true;
-            Draw1(Convert.ToInt32(Rankx1.Value - 1));
+            Draw1(Convert.ToInt32(numericUpDown1.Value - 1));
             XStream.Close();
             XStream =openFileDialog1.OpenFile();
             foreach (Stream s in YStream) s.Close();
@@ -1581,7 +1581,7 @@ namespace WindowsFormsApp1
             PointPairList listPointsTwo = new PointPairList();
             LineItem myCurveOne;
             LineItem myCurve2;
-            myPane.Title.Text = "Results Y_" + m.ToString();
+            myPane.Title.Text = "Results Y_" + (m+1).ToString();
             double _x, _y;
             int n = (int) Range.Value;
             double t = YG[m][0];
@@ -1619,17 +1619,28 @@ namespace WindowsFormsApp1
             myCurve2 = myPane.AddCurve(null, listPointsTwo, Color.Green, SymbolType.None);
             zedGraphControl1.AxisChange();
             zedGraphControl1.Invalidate();
+            zedGraphControl1.Update();
         }
 
         private void dimy_ValueChanged(object sender, EventArgs e)
         {
-            Rankx1.Maximum = dimy.Value;
+            numericUpDown1.Maximum = dimy.Value;
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
+            if (numericUpDown1.Value > dimy.Value)
+            {
+                numericUpDown1.Value = dimy.Value;
+            }
+
+            if (numericUpDown1.Value <1)
+            {
+                numericUpDown1.Value = 1;
+            }
+
             if (Approximate)
-                Draw1(Convert.ToInt32(Rankx1.Value - 1));
+                Draw1(Convert.ToInt32(numericUpDown1.Value - 1));
         }
 
         private void button1_Click(object sender, EventArgs e)
